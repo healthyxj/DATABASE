@@ -1,4 +1,4 @@
-SQL
+# SQL
 
 数据库可以用于存储数据、检索数据和生成新数据
 
@@ -15,18 +15,34 @@ SQL
 * 集合运算(针对集合)
   * 交，指求交集，∩
   * 并，指求并集，∪
-  * 差，求差集
-  * 笛卡尔积
+  * 差，求差集，如R-S，表示属于R但不属于S的元素
+  * 笛卡尔积，将两个表格中的所有行排列组合的方法，类似于矢量的乘法
 * 关系运算(针对表)
-  * 选择，<b>从行的角度</b>对原表进行操作
-  * 投影，<b>从列的角度</b>对原表进行操作
-  * 除，从行和列的角度进行运算
+  * 选择，σ，<b>从行的角度</b>对原表进行操作
+  * 投影，Π，<b>从列的角度</b>对原表进行操作
+  * 除，从行和列的角度进行运算。从“被除表格”中调取“除表格”包含的所有行，然后再除去“除表格“中的内容
   * 连接
     * 内连接(inner join)，类似于交集
-    * 外连接(包括左外连接、右外连接、全外连接)，类似于并集，左外连接是三部分中最左边的部分；全外连接是不包括并集的部分
+    * 外连接(包括左外连接、右外连接、全外连接)，类似于并集，左外连接是三部分中最左边的部分；全外连接是并集的部分
     * 交叉连接
 
+补充：
+
+选择 σ条件(关系名)；外连接：把舍弃的元组也保存在结果关系中，在其他属性上填空值(null)
+
+ 
+
 第三章、基础查询
+
+SQL，数据库由数据库管理系统(DBMS)操纵和管理，用户通过数据库管理系统访问数据库中的数据。数据库管理的是表，数据以表格的形式存储在数据库中。数据库管理员(DBA)管理数据库，通过SQL语言管理数据库。
+
+SQL的特点
+
+* 不是某个数据库专有的语言，学完SQL后可以与几乎所有的数据库打交道
+* SQL简洁，完成核心功能只用了9个动词
+* SQL可以进行非常复杂和高级的数据库操作
+
+
 
 SQL语言的分类
 
@@ -55,6 +71,84 @@ SQL语言包括三部分
 | 操作对象 |   增加   |   删除   |   修改   |   查询   |
 |   记录   |  insert  |  delete  |  update  |  select  |
 
+增
+
+insert
+
+* 操作：插入单行数据
+* 语法：insert into 表名 (列名) values (列值)
+* 案例：insert into Students (姓名，性别，出生日期) values ('王伟华','男',1983/6/15)，表示增加了一行，王伟华，性别男，出生日期是……
+
+insert,select
+
+* 操作：使用insert,select语句将现有表中的数据添加到已有的新表中
+* 语法：insert into 已有的新表 (列名) /n select 原表列名 from 原表名
+* 案例：insert into addressList(''姓名'',''地址'',"电子邮件") /n select name,address,email from Students
+
+删
+
+delete
+
+* 操作：使用delete删除表中某行数据
+* 语法：delete from 表名 where 删除条件
+* 案例：delete from a where name='王伟华' ，表示删除表a中<b>列值为王伟华</b>的行
+
+truncate
+
+* 操作：使用truncate table删除表
+* 语法：truncate  table 表名
+* 案例：truncate table addressList
+
+改
+
+update
+
+* 操作：使用update更新修改数据
+*  语法：update 表名 set 列名=更新值 where 更新条件
+* 案例：update addressList set 年龄=18 where 姓名=’王伟华‘
+
+查 
+
+select
+
+* 操作：使用select查询数据，查询多个列要用逗号将列与列隔开（顺序不重要）
+* 语法：select 列名 from 表名
+* 案例：select city from students
+* select * from 表名称，查询所有列
+
+注意事项：select *要尽量避免使用，防止资源的浪费；select student.姓名,select student.性别 from student可以简化为select 姓名，性别 from student
+
+select完整语句select 列名称 [into 新表名] from 表 [where 查询条件] [group by 分组表达式] [having 分组条件] [order by 列名[asc|desc]]
+
+使用[计算列]
+
+| id   | name  | price |
+| ---- | ----- | ----- |
+| 1    | apple | 3     |
+| 2    | pear  | 4     |
+
+1、对fruit表中的所有价格(price)进行求和
+
+select sum(price) from fruit
+
+查询结果是7.0
+
+2、查询fruit表中字段价格的个数
+
+select count(price) from fruit
+
+查询结果是2，有两种价格
+
+3、查询价格提升50%后的信息
+
+select price*1.05 from fruit
+
+结果是
+
+SQL对大小写不敏感
+
+
+
 查询是所有的关键
 
 查看单列 select col
@@ -67,12 +161,13 @@ SQL语言包括三部分
 
 order by作用于单个或多个字段，默认是升序排序；加desc可以实现降序排列；作用于空值null，将空值null放在最后
 
-3、数据控制语言
+3、数据控制语言DCL
 
 |    --    | 操作方式 | 操作方式 |
 | :------: | :------: | :------: |
 | 操作对象 | 增加权限 | 删除权限 |
 |  数据库  |  grant   |  revoke  |
+
 
 
 现实世界中客观对象的抽象过程
@@ -136,5 +231,4 @@ order by作用于单个或多个字段，默认是升序排序；加desc可以�
 确保每个实体转化为一个关系；将每个联系也转化为一个关系；
 
 将一个实体的属性值添加到另一个实体or<b>将少端实体的主键添加到多端实体的主键中</b>。
-
 
