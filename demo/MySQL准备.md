@@ -66,6 +66,13 @@ source C:\ProgramData\MySQL\MySQL Server 8.0\Uploads\表名称.sql
 load data infile 'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/anatomydict.csv' into table anatomydict CHARACTER SET utf8  FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES;
 ~~~
 
+对于有空间索引的数据的导入，要采用以下方法
+
+~~~mysql
+load data infile 'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/d_labeledimage.csv' into table d_labeledimage  CHARACTER SET utf8  FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES  (@var1,@var2,@var3,@var4,@var5,@var6,@var7,@var8,@var9,@var10,@var11,@var12) 
+SET  ID=@var1, ImageID=@var2, AreaID=@var3, Path=ST_GeomFromText(@var4) , PathType=@var5, UserID=@var6, UserType=@var7, UserID_Check_1=@var8, UserID_Check_2=@var9, CreateDate=STR_TO_DATE(@var10,'%Y-%m-%d %H:%i:%s'), PatientID=@var11, CreatedBy=@var12;
+~~~
+
 导入语句的说明
 
 * load data infile 'csv文件的绝对路径'
@@ -74,6 +81,8 @@ load data infile 'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/anatomydict.csv'
 * fields terminated by  指定字段的分隔符
 * optionally enclosed by ' “ '：认为双引号是独立的字段
 * lines terminated by ：指定行分隔符
+* 对于MySQL8.0版本及以上，导入引用，需要使用ST_GeomFromText
+* var代表列，采取多删少补的原则
 
 结果如下，表明导入成功
 
