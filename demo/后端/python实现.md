@@ -46,7 +46,7 @@ python manage.py runserver
 * django_db
   * manage.py
   * django_db
-    * _init_.py
+    * ______init______.py
     * settings.py
     * urls.py
     * asgi.py
@@ -55,18 +55,42 @@ python manage.py runserver
 其中
 
 * **外层的django_db/目录**与Django无关，**只是你项目的容器**，可以任意重命名。
+
 * manage.py：一个命令行工具，管理Django的交互脚本。
+
 * **内层的django_db/目录是真正的项目文件包裹目录**，它的名字是你引用内部文件的Python包名，例如：mysite.urls。
+
 * django_db/______init______.py:一个定义包的空文件。(**init前后各有两个下划线**)
+
 * django_db/settings.py:项目的配置文件。
+
+  * 每添加一个新的APP，就需要在**INSTALLED_APP**中增加该APP的名称
+  * 如果需要与数据库有关联，就修改对应的**DATABASES**
+
 * django_db/urls.py:**路由文件，所有的任务都是从这里开始分配**，相当于Django驱动站点的目录。
+
+  * 配置路由，打开服务器就能进行访问
+
+  * 配置的格式是
+
+  * ~~~python
+    from APP.view import function
+    
+    url_patterns = {
+        ('路径', function)
+    }
+    ~~~
+
 * django_db/wsgi.py:一个基于WSGI的web服务器进入点，**提供底层的网络通信功能**，通常不用关心。
+
 * django_db/asgi.py：一个基于ASGI的web服务器进入点，**提供异步的网络通信功能**，通常不用关心。
 
 
 
 
 ## 2、在django中创建新的应用(query)
+
+**使用startapp创建新的APP**
 
 在Anaconda Powershell Prompt 中输入
 
@@ -127,6 +151,11 @@ urlpatterns = [
 
 可以仿照格式创建其他的路由和相应的函数。
 
+~~~python
+可以使用
+from .view import *
+~~~
+
 ## 2、创建mysql查询视图
 
 在query/views.py中输入
@@ -176,12 +205,16 @@ def query_patient_by_id(request,pid):
 
 import MySQLdb
 
-#无反应(>>>)就是安装成功
+#无反应(只显示>>>)就是安装成功
 ~~~
+
+说是同步其实是**通过python的代码对数据库进行管理，也就是ORM(Object Relational Mapping)对象关系映射**。
 
 ## 1、创建数据表
 
-**在query/models.py下创建数据表的定义**，并将mysql数据进行同步。
+**在query/models.py下创建数据表的定义**，也就是创建APP对应的数据表结构。
+
+一种方法是直接在models中手动创建一个个数据表。
 
 ~~~python
 class Patientbasicinfos(models.Model):
@@ -204,7 +237,17 @@ class Patientbasicinfos(models.Model):
 
 ~~~
 
-根据上面的代码，Django会创建该app对应的数据库表结构，并且为Patientbasicinfos对象创建基于python的数据库访问API。
+根据上面的代码，Django会创建该app对应的数据库表结构，并且为Patientbasicinfos对象**创建基于python的数据库访问API**。
+
+为了方便，可以采用另一种方法，由**已生成的数据表进行导入**。
+
+在控制台中输入
+
+~~~cmd
+python manage.py inspectdb > query/models.py
+~~~
+
+
 
 ## 2、Django配置mysql
 
@@ -224,7 +267,7 @@ INSTALLED_APPS = [
 ]
 ~~~
 
-django_db/settings.py修改DATABASE的定义
+django_db/settings.py修改DATABASE的定义，主要是修改engine，以及要访问的数据库的用户名和密码。
 
 ~~~python
 DATABASES = {
@@ -248,7 +291,7 @@ DATABASES = {
 python manage.py migrate
 ~~~
 
-
+就会在migrations文件夹中生成initial文件，表示创建了映射。
 
 # 四、创建简单的html界面
 
@@ -305,7 +348,7 @@ python manage.py migrate
 </html>
 ~~~
 
-添加表格的定义
+在**form标签之间添加表格的定义**，
 
 ~~~html
 {% if error %}
@@ -393,5 +436,50 @@ def query_patient(request):
     return render(request, 'query/query_patient.html', {'error': 'display'})
 ~~~
 
+注意，这里的return render(quest, )后面跟的路由默认是templates目录下的
+
+#  遇到的问题
+
+1、添加视图响应函数，在浏览器中显示
+
+```
+The view query.views.query_patient didn't return an HttpResponse object. It returned None instead.
+```
+
+else语句要往前缩进
 
 
+
+2、初始界面显示出来，但是一查询就
+
+'NoneType' object has no attribute 'strip'
+
+patient打成了patinet
+
+# 总结
+
+创建工程
+
+~~~
+推荐使用命令行的方法，需要自己移动到所需要的文件路径下
+django-admin startproject projectname
+~~~
+
+创建一个APP
+
+~~~
+同样是推荐使用命令行的方式
+django-admin startapp appname
+~~~
+
+连接数据库
+
+两种方式
+
+* 通过对象关系映射(ORM)
+  * 配置settings.py(修改DATABASES中的内容)
+  * 在数据已有的情况下，用inspectdb进行导入，反向生成models
+  * view中就可以直接使用数据库中的内容
+* 直接配置SQL
+  * 配置settings.py(修改STARTAPP中的内容，增加APP名称)
+  * 需要在view中添加数据库连接的功能，即database.connect("localhost", 3306, "root", "password", "要连接的数据库名称")
